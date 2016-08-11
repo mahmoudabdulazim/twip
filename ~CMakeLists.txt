@@ -1,0 +1,51 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(twip)
+
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rospy
+  std_msgs
+  message_generation
+)
+
+## System dependencies are found with CMake's conventions
+find_package(Boost REQUIRED COMPONENTS system)
+
+add_message_files(
+  FILES
+  ControlSignal.msg
+  ThreeDOFState.msg
+  )
+
+generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
+
+#set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DDMP_FIFO_RATE=2 -Wall -pthread -lpigpio -lrt")
+
+include_directories(include ${catkin_INCLUDE_DIRS})
+
+#add_library(I2Cdev src/I2Cdev.cpp)
+
+#add_library(MPU6050 src/MPU6050.cpp)
+
+#add_library(PWM src/pwm.c)
+
+#add_executable(State-Publisher src/State-Publisher.cpp)
+#target_link_libraries(State-Publisher MPU6050 I2Cdev PWM wiringPi ${catkin_LIBRARIES})
+
+#add_executable(Motor-Controller src/Motor-Controllers.cpp)
+#target_link_libraries(Motor-Controller wiringPi ${catkin_LIBRARIES})
+
+
+#catkin_package(
+#   INCLUDE_DIRS include
+#   LIBRARIES PWM twip
+#   CATKIN_DEPENDS message_runtime roscpp rospy std_msgs
+#   DEPENDS system_lib gtkmm-3.0 pthread eigen pigpio rt
+#)
+

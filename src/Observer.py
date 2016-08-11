@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+
+import rospy
+import numpy as np
+from twip.msg import ControlSignal
+from twip.msg import ThreeDOFState
+
+C   = np.matrix("-12.3687 0 0;0 -12.3687 0")
+A   = np.matrix("-39.6 105.9 1690.2;1 0 0;0 1 0")
+B   = np.matrix("1;0;0")
+L   = np.matrix("-21.3097 -4.4108; -0.0742 -1.4402; -0.2181 0.3726")
+K   = np.matrix("-23.6 194.9 1864.2")
+X0  = np.matrix("0;0;0")
+Pub = rospy.Publisher('ControlAction',ControlSignal,queue_size=1)
+u   = 0
+
+def sendControl(data):
+        global X0,u
+        msg  = ControlSignal()
+        Y    = np.matrix(((data.Pitch),(data.PitchRate)))
+        Y0   = np.dot(C,X0)
+        Yhat = Y - Y0
+        Xdot = np.dot(L,Yhat) + np.dot(A,X0) + np.dot(B,u)
+
+        X    = Xdot*data.Time + X0
+        X0   = X
+
+        u = -np.dot(K,Xdot*0.01)
+	Theta    = Y0[0,0].item()
+	ThetaDot = Y0[1,0].item()	
+	rospy.loginfo("Pitch: %.3f , Pitch Rate: %.3f" % (Theta,ThetaDot) )
+        msg.Motor1 =u[0,0].item()
+        msg.Motor2 =u[0,0].item()
+
+        if (abs(msg.Motor1)> 2999):
+                msg.Motor1 = 2999
+
+        if (abs(msg.Motor2)> 2999):
+                msg.Motor2 = 2999
+
+        Pub.publish(msg)
+
+
+def listener():
+        rospy.init_node('Pole_Placement_Controller',anonymous=True)
+        rospy.Subscriber("TWIPStates",ThreeDOFState,sendControl)
+        rospy.spin()
+
+if __name__ == '__main__':
+        listener()
+
+
